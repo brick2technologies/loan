@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import HomePage from "./pages/HomePage";
-import PersonalLoanPage from "./pages/PersonalLoanPage";
+import PersonalLoan from "./pages/PersonalLoan";
 import HomeLoanPage from "./pages/HomeLoanPage";
 import VehicleLoanPage from "./pages/VehicleLoan";
 import ScrollToTop from "./components/ScrollToTop";
@@ -32,7 +32,7 @@ export default function App() {
       <main className="min-h-screen">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/personal-loan" element={<PersonalLoanPage />} />
+          <Route path="/personal-loan" element={<PersonalLoan />} />
           <Route path="/home-loan" element={<HomeLoanPage />}/>
           <Route path="/vehicle-loan" element={<VehicleLoanPage />}/>
           <Route path="/medical-loan" element={<MedicalLoanPage />}/>
