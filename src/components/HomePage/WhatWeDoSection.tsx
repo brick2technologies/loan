@@ -1,6 +1,4 @@
-"use client";
-
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -51,80 +49,37 @@ export default function WhatWeDoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // ✅ Desktop only (CRITICAL)
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    if (!isDesktop) return;
+
     const section = sectionRef.current;
     const track = trackRef.current;
     if (!section || !track) return;
 
-    // ─── DESKTOP GSAP PINNED HORIZONTAL SCROLL ───
-    if (window.innerWidth >= 1024) {
-      const scrollWidth = track.scrollWidth - window.innerWidth;
+    const scrollWidth = track.scrollWidth - window.innerWidth;
 
+    const ctx = gsap.context(() => {
       gsap.to(track, {
         x: -scrollWidth,
         ease: "none",
         scrollTrigger: {
           trigger: section,
           start: "top top",
-          end: () => `+=${scrollWidth}`,
+          end: `+=${scrollWidth}`,
           scrub: 1,
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
       });
-    }
+    }, section);
 
-    // ─── MOBILE: SMOOTH TOUCH SCROLL + MOMENTUM ───
-    if (window.innerWidth < 1024) {
-      let isDown = false;
-      let startX: number;
-      let scrollLeft: number;
-
-      const startDragging = (e: TouchEvent | MouseEvent) => {
-        isDown = true;
-        startX = ("touches" in e ? e.touches[0] : e).pageX - track.offsetLeft;
-        scrollLeft = track.scrollLeft;
-        track.style.cursor = "grabbing";
-      };
-
-      const stopDragging = () => {
-        isDown = false;
-        track.style.cursor = "grab";
-      };
-
-      const drag = (e: TouchEvent | MouseEvent) => {
-        if (!isDown) return;
-        e.preventDefault();
-        const x = ("touches" in e ? e.touches[0] : e).pageX - track.offsetLeft;
-        const walk = (x - startX) * 2; // scroll speed multiplier
-        track.scrollLeft = scrollLeft - walk;
-      };
-
-      // Add event listeners for both touch and mouse (better UX on tablets)
-      track.addEventListener("mousedown", startDragging);
-      track.addEventListener("touchstart", startDragging);
-      track.addEventListener("mouseleave", stopDragging);
-      track.addEventListener("mouseup", stopDragging);
-      track.addEventListener("touchend", stopDragging);
-      track.addEventListener("mousemove", drag);
-      track.addEventListener("touchmove", drag);
-
-      // Optional: Add subtle snap / inertia feel with CSS (modern browsers)
-      track.style.scrollSnapType = "x proximity";
-      track.style.scrollBehavior = "smooth";
-
-      return () => {
-        // Cleanup
-        track.removeEventListener("mousedown", startDragging);
-        track.removeEventListener("touchstart", startDragging);
-        track.removeEventListener("mouseleave", stopDragging);
-        track.removeEventListener("mouseup", stopDragging);
-        track.removeEventListener("touchend", stopDragging);
-        track.removeEventListener("mousemove", drag);
-        track.removeEventListener("touchmove", drag);
-      };
-    }
+    return () => {
+      ctx.revert(); // ✅ Scoped & safe cleanup
+      ScrollTrigger.clearScrollMemory(); // ✅ Reset scroll state
+    };
   }, []);
 
   return (
@@ -132,7 +87,7 @@ export default function WhatWeDoSection() {
       {/* ================= SECTION ================= */}
       <section
         ref={sectionRef}
-        className="relative bg-[#E5E7EB] py-20 lg:overflow-hidden"
+        className="relative bg-[#E5E7EB] py-20 overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-6">
           {/* Header */}
@@ -156,14 +111,7 @@ export default function WhatWeDoSection() {
         <div className="relative">
           <div
             ref={trackRef}
-            className="
-              flex gap-6 px-6 w-max
-              overflow-x-auto
-              snap-x snap-mandatory
-              scrollbar-hide
-              cursor-grab active:cursor-grabbing
-              -webkit-overflow-scrolling: touch /* iOS momentum */
-            "
+            className="flex gap-8 px-6 w-max will-change-transform"
           >
             {points.map((item, index) => {
               const Icon = item.icon;
@@ -172,7 +120,7 @@ export default function WhatWeDoSection() {
                 <div
                   key={index}
                   className="
-                    w-[80vw] h-[65vh]
+                    w-[70vw] h-[70vh]
                     max-w-[900px] max-h-[520px]
                     rounded-3xl
                     border border-black/10
@@ -182,7 +130,8 @@ export default function WhatWeDoSection() {
                     flex flex-col
                     items-center justify-center
                     text-center
-                    snap-center
+                    transition-transform
+                    hover:-translate-y-2
                   "
                 >
                   <div className="w-16 h-16 rounded-xl bg-black/5 flex items-center justify-center mb-6">
