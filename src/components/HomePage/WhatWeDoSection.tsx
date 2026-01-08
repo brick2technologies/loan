@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -49,10 +49,12 @@ export default function WhatWeDoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  useLayoutEffect(() => {
-    // ✅ Desktop only
-    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-    if (!isDesktop) return;
+  useEffect(() => {
+    // 🚫 HARD STOP for mobile/tablet
+    if (window.innerWidth < 1024) {
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+      return;
+    }
 
     const section = sectionRef.current;
     const track = trackRef.current;
@@ -60,25 +62,23 @@ export default function WhatWeDoSection() {
 
     const scrollWidth = track.scrollWidth - window.innerWidth;
 
-    const ctx = gsap.context(() => {
-      gsap.to(track, {
-        x: -scrollWidth,
-        ease: "none",
-        scrollTrigger: {
-          trigger: section,
-          start: "top top",
-          end: `+=${scrollWidth}`,
-          scrub: 1,
-          pin: true,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-    }, section);
+    const tween = gsap.to(track, {
+      x: -scrollWidth,
+      ease: "none",
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        end: `+=${scrollWidth}`,
+        scrub: 1,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+      },
+    });
 
     return () => {
-      ctx.revert();
-      ScrollTrigger.clearScrollMemory();
+      tween.scrollTrigger?.kill();
+      tween.kill();
     };
   }, []);
 
@@ -87,7 +87,11 @@ export default function WhatWeDoSection() {
       {/* ================= SECTION ================= */}
       <section
         ref={sectionRef}
-        className="relative bg-[#E5E7EB] py-20 overflow-hidden"
+        className="
+          relative bg-[#E5E7EB] py-20
+          lg:overflow-hidden
+          overflow-visible
+        "
       >
         <div className="max-w-7xl mx-auto px-6">
           {/* Header */}
@@ -112,12 +116,15 @@ export default function WhatWeDoSection() {
           <div
             ref={trackRef}
             className="
-              flex gap-8 px-6 w-max will-change-transform
-              overflow-x-auto touch-pan-x
+              flex gap-6 px-6 w-max
+              overflow-x-auto
+              touch-pan-x
               snap-x snap-mandatory
               lg:overflow-visible
-              scrollbar-hide
             "
+            style={{
+              WebkitOverflowScrolling: "touch",
+            }}
           >
             {points.map((item, index) => {
               const Icon = item.icon;
@@ -126,7 +133,7 @@ export default function WhatWeDoSection() {
                 <div
                   key={index}
                   className="
-                    w-[70vw] h-[70vh]
+                    w-[80vw] h-[65vh]
                     max-w-[900px] max-h-[520px]
                     rounded-3xl
                     border border-black/10
@@ -136,8 +143,6 @@ export default function WhatWeDoSection() {
                     flex flex-col
                     items-center justify-center
                     text-center
-                    transition-transform
-                    hover:-translate-y-2
                     snap-center
                   "
                 >
