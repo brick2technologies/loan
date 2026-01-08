@@ -1,5 +1,4 @@
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
@@ -50,43 +49,48 @@ export default function WhatWeDoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-  const section = sectionRef.current;
-  const track = trackRef.current;
-  if (!section || !track) return;
+  useLayoutEffect(() => {
+    // ✅ Desktop only (CRITICAL)
+    const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+    if (!isDesktop) return;
 
-  const scrollWidth = track.scrollWidth - window.innerWidth;
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    if (!section || !track) return;
 
-  const ctx = gsap.context(() => {
-    gsap.to(track, {
-      x: -scrollWidth,
-      ease: "none",
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: `+=${scrollWidth}`,
-        pin: true,
-        scrub: 1,
-        anticipatePin: 1,
-      },
-    });
-  }, section);
+    const scrollWidth = track.scrollWidth - window.innerWidth;
 
-  return () => {
-    ctx.revert(); // ✅ SAFE CLEANUP
-  };
-}, []);
+    const ctx = gsap.context(() => {
+      gsap.to(track, {
+        x: -scrollWidth,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: `+=${scrollWidth}`,
+          scrub: 1,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+    }, section);
 
+    return () => {
+      ctx.revert(); // ✅ Scoped & safe cleanup
+      ScrollTrigger.clearScrollMemory(); // ✅ Reset scroll state
+    };
+  }, []);
 
   return (
     <>
       {/* ================= SECTION ================= */}
       <section
         ref={sectionRef}
-        className="relative overflow-hidden bg-[#E5E7EB] py-20"
+        className="relative bg-[#E5E7EB] py-20 overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-6">
-          {/* ================= HEADER ================= */}
+          {/* Header */}
           <div className="text-center mb-14">
             <span className="inline-block mb-3 rounded-full bg-black/5 px-3 py-1 text-[11px] uppercase tracking-widest text-gray-600">
               What We Do
@@ -103,34 +107,45 @@ export default function WhatWeDoSection() {
           </div>
         </div>
 
-        {/* ================= HORIZONTAL SCROLL ================= */}
+        {/* ================= HORIZONTAL TRACK ================= */}
         <div className="relative">
-          <div ref={trackRef} className="flex gap-8 px-6 w-max">
+          <div
+            ref={trackRef}
+            className="flex gap-8 px-6 w-max will-change-transform"
+          >
             {points.map((item, index) => {
               const Icon = item.icon;
 
               return (
-                <motion.div
+                <div
                   key={index}
-                  className="w-[70vw] h-[70vh] max-w-[900px] max-h-[520px] rounded-3xl border border-black/10 bg-white p-8 sm:p-10 shrink-0 flex flex-col items-center justify-center text-center"
-                  whileHover={{ y: -6 }}
-                  transition={{ type: "spring", stiffness: 200 }}
+                  className="
+                    w-[70vw] h-[70vh]
+                    max-w-[900px] max-h-[520px]
+                    rounded-3xl
+                    border border-black/10
+                    bg-white
+                    p-8 sm:p-10
+                    shrink-0
+                    flex flex-col
+                    items-center justify-center
+                    text-center
+                    transition-transform
+                    hover:-translate-y-2
+                  "
                 >
-                  {/* Icon centered */}
                   <div className="w-16 h-16 rounded-xl bg-black/5 flex items-center justify-center mb-6">
                     <Icon size={28} className="text-gray-900" />
                   </div>
 
-                  {/* Title adjusted */}
                   <h3 className="amplessoft text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
                     {item.title}
                   </h3>
 
-                  {/* Description bold & larger */}
                   <p className="text-base sm:text-lg font-semibold text-gray-800 leading-relaxed max-w-md">
                     {item.desc}
                   </p>
-                </motion.div>
+                </div>
               );
             })}
           </div>
@@ -138,25 +153,16 @@ export default function WhatWeDoSection() {
       </section>
 
       {/* ================= FULL WIDTH CTA ================= */}
-<section className="w-screen bg-[#E5E7EB] py-24 sm:py-28 lg:py-32">
-  <div className="mx-auto max-w-[1600px] px-6 sm:px-10 text-center">
-    <p
-      className="
-        text-gray-900
-        font-extrabold
-        leading-[1.05]
-        text-[clamp(2.5rem,6vw,6.5rem)]
-      "
-    >
-      You don’t chase banks.{" "}
-     <span className="block mt-3 bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
-  We do it for you.
-</span>
-
-    </p>
-  </div>
-</section>
-
+      <section className="w-screen bg-[#E5E7EB] py-24 sm:py-28 lg:py-32">
+        <div className="mx-auto max-w-[1600px] px-6 sm:px-10 text-center">
+          <p className="text-gray-900 font-extrabold leading-[1.05] text-[clamp(2.5rem,6vw,6.5rem)]">
+            You don’t chase banks.
+            <span className="block mt-3 bg-gradient-to-r from-black to-gray-600 bg-clip-text text-transparent">
+              We do it for you.
+            </span>
+          </p>
+        </div>
+      </section>
     </>
   );
 }

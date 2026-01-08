@@ -167,3 +167,12 @@ canvas {
   font-family: "Amplessoft", system-ui, -apple-system, BlinkMacSystemFont,
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
+
+
+.input {
+  @apply w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-black;
+}
+
+.file {
+  @apply w-full border rounded-lg p-2;
+}

@@ -1,12 +1,11 @@
-// src/pages/PersonalLoanPage.tsx
-"use client";
-
 import { useState, useEffect } from "react";
+import { useLoanModal } from '../context/LoanModalContext';
 
 // ────────────────────────────────────────────────────────────────────────────────
 // HERO SECTION
 // ────────────────────────────────────────────────────────────────────────────────
 function HeroSection() {
+  const { openModal } = useLoanModal();
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
@@ -33,6 +32,7 @@ function HeroSection() {
     e.preventDefault();
     // 🔜 API integration will go here
     console.log("Form Data:", formData);
+    openModal('personal');
   };
 
   return (
@@ -426,6 +426,8 @@ function TypesOfPersonalLoans() {
 // PERSONAL LOAN FEATURES & BENEFITS
 // ────────────────────────────────────────────────────────────────────────────────
 function PersonalLoanFeatures() {
+  const { openModal } = useLoanModal();
+
   const features = [
     {
       icon: "💰",
@@ -552,11 +554,17 @@ function PersonalLoanFeatures() {
             <h3 className="amplessoft text-2xl md:text-3xl font-bold text-[#0B0E14] mb-4">Calculate Your EMI Now</h3>
             <p className="text-lg text-gray-700 mb-8">Use our free, accurate personal loan EMI calculator to plan your exact monthly payments</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-[#0B0E14] text-[#E5E7EB] px-10 py-5 rounded-xl font-bold text-lg hover:shadow-xl transition-all">
-                Try EMI Calculator
-              </button>
-              <button className="border-2 border-[#0B0E14] text-[#0B0E14] px-10 py-5 rounded-xl font-bold text-lg hover:bg-[#0B0E14]/5 transition-all">
+              <button
+                onClick={() => openModal('personal')}
+                className="bg-[#0B0E14] text-[#E5E7EB] px-10 py-5 rounded-xl font-bold text-lg hover:shadow-xl transition-all"
+              >
                 Apply Now
+              </button>
+              <button
+                onClick={() => openModal('personal')}
+                className="border-2 border-[#0B0E14] text-[#0B0E14] px-10 py-5 rounded-xl font-bold text-lg hover:bg-[#0B0E14]/5 transition-all"
+              >
+                Check EMI & Apply
               </button>
             </div>
           </div>
@@ -574,6 +582,8 @@ function PersonalLoanFeatures() {
 // LOAN DETAILS (Interest & Charges)
 // ────────────────────────────────────────────────────────────────────────────────
 function LoanDetails() {
+  const { openModal } = useLoanModal();
+
   return (
     <section id="interest" className="bg-[#E5E7EB] py-16 md:py-20 px-5 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -628,9 +638,12 @@ function LoanDetails() {
         </div>
 
         <div className="text-center mt-10">
-          <div className="inline-block bg-[#0B0E14] text-[#E5E7EB] px-8 md:px-12 py-4 md:py-5 rounded-xl font-semibold text-lg md:text-xl hover:shadow-xl transition-all">
+          <button
+            onClick={() => openModal('personal')}
+            className="inline-block bg-[#0B0E14] text-[#E5E7EB] px-8 md:px-12 py-4 md:py-5 rounded-xl font-semibold text-lg md:text-xl hover:shadow-xl transition-all"
+          >
             Check Your Exact Offer in 2 Minutes
-          </div>
+          </button>
         </div>
       </div>
     </section>
@@ -641,6 +654,8 @@ function LoanDetails() {
 // ELIGIBILITY
 // ────────────────────────────────────────────────────────────────────────────────
 function Eligibility() {
+  const { openModal } = useLoanModal();
+
   return (
     <section id="eligibility" className="bg-[#E5E7EB] py-16 md:py-20 px-5 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -724,9 +739,12 @@ function Eligibility() {
           <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
             Fill the form above — our experts will find the right bank for your profile in <strong>2 minutes</strong>.
           </p>
-          <div className="bg-[#0B0E14] text-[#E5E7EB] inline-block px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all">
+          <button
+            onClick={() => openModal("personal")}
+            className="bg-[#0B0E14] text-[#E5E7EB] inline-block px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all"
+          >
             Check My Eligibility Now
-          </div>
+          </button>
         </div>
       </div>
     </section>
@@ -785,6 +803,8 @@ function HowWeHelp() {
 // DOCUMENTS REQUIRED
 // ────────────────────────────────────────────────────────────────────────────────
 function DocumentsRequired() {
+  const { openModal } = useLoanModal();
+
   return (
     <section className="bg-[#E5E7EB] py-16 md:py-20 px-5 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -867,9 +887,12 @@ function DocumentsRequired() {
 
           <p className="mt-10 text-lg md:text-xl text-gray-700">Upload digital copies — no need to visit branches!</p>
 
-          <div className="mt-8 inline-block bg-[#0B0E14] text-[#E5E7EB] px-10 py-5 rounded-xl font-semibold text-lg md:text-xl hover:shadow-xl transition-all">
+          <button
+            onClick={() => openModal("personal")}
+            className="mt-8 inline-block bg-[#0B0E14] text-[#E5E7EB] px-10 py-5 rounded-xl font-semibold text-lg md:text-xl hover:shadow-xl transition-all"
+          >
             Upload Documents & Apply Now
-          </div>
+          </button>
         </div>
       </div>
     </section>
@@ -932,6 +955,8 @@ function WhyChooseUs() {
 // FAQ
 // ────────────────────────────────────────────────────────────────────────────────
 function FAQ() {
+  const { openModal } = useLoanModal();
+
   const faqs = [
     { question: "Are you a bank or NBFC?", answer: "No, we are an independent **loan facilitation & advisory platform**. We partner with multiple trusted banks and NBFCs to help you get the best possible personal loan offer." },
     { question: "Is my personal information safe with you?", answer: "Yes — 100%. We use **bank-grade 256-bit SSL encryption** and follow strict RBI-compliant data privacy guidelines. Your information is shared **only** with the banks/NBFCs we match you to for loan processing — never sold or misused." },
@@ -976,11 +1001,17 @@ function FAQ() {
           <p className="text-xl md:text-2xl font-semibold text-[#0B0E14] mb-4">Still have a question?</p>
           <p className="text-lg text-gray-700 mb-8">Our loan experts are here to help — instant chat or call support available.</p>
           <div className="inline-flex flex-col sm:flex-row gap-4">
-            <button className="bg-[#0B0E14] text-[#E5E7EB] px-10 py-5 rounded-xl font-semibold text-lg hover:shadow-xl transition-all">
-              Chat With Us Now
+            <button
+              onClick={() => openModal('personal')}
+              className="bg-[#0B0E14] text-[#E5E7EB] px-10 py-5 rounded-xl font-semibold text-lg hover:shadow-xl transition-all"
+            >
+              Apply Now – Get Started
             </button>
-            <button className="border-2 border-[#0B0E14] text-[#0B0E14] px-10 py-5 rounded-xl font-semibold text-lg hover:bg-[#0B0E14]/5 transition-all">
-              Call Us: 1800-XXX-XXXX
+            <button
+              onClick={() => openModal('personal')}
+              className="border-2 border-[#0B0E14] text-[#0B0E14] px-10 py-5 rounded-xl font-semibold text-lg hover:bg-[#0B0E14]/5 transition-all"
+            >
+              Talk to Loan Expert
             </button>
           </div>
         </div>

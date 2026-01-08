@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import SafeSpline from "../spline/SafeSpline";
 
 export default function HeroSection() {
@@ -55,9 +56,11 @@ export default function HeroSection() {
             </p>
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link to="/personal-loan">  
               <button className="rounded-full bg-[#0B0E14] px-10 py-4 text-[#E5E7EB] font-semibold hover:shadow-[0_0_40px_rgba(0,0,0,0.35)] transition">
                 Apply for a Loan
               </button>
+              </Link>
 
               <button className="rounded-full border border-black/10 bg-white/60 backdrop-blur px-10 py-4 text-[#1F2937] hover:bg-white transition">
                 Check Eligibility
