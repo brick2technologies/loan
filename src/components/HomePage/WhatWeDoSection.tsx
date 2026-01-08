@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -48,70 +50,81 @@ const points = [
 export default function WhatWeDoSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-
-  /* ================= DESKTOP GSAP ================= */
   useEffect(() => {
-    if (window.innerWidth < 1024) {
-      ScrollTrigger.getAll().forEach((st) => st.kill());
-      return;
-    }
-
     const section = sectionRef.current;
     const track = trackRef.current;
     if (!section || !track) return;
 
-    const scrollWidth = track.scrollWidth - window.innerWidth;
+    // ─── DESKTOP GSAP PINNED HORIZONTAL SCROLL ───
+    if (window.innerWidth >= 1024) {
+      const scrollWidth = track.scrollWidth - window.innerWidth;
 
-    const tween = gsap.to(track, {
-      x: -scrollWidth,
-      ease: "none",
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        end: `+=${scrollWidth}`,
-        scrub: 1,
-        pin: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-      },
-    });
+      gsap.to(track, {
+        x: -scrollWidth,
+        ease: "none",
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: () => `+=${scrollWidth}`,
+          scrub: 1,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
+    }
 
-    return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
-    };
-  }, []);
+    // ─── MOBILE: SMOOTH TOUCH SCROLL + MOMENTUM ───
+    if (window.innerWidth < 1024) {
+      let isDown = false;
+      let startX: number;
+      let scrollLeft: number;
 
-  /* ================= MOBILE AUTO SLIDE ================= */
-  useEffect(() => {
-    if (window.innerWidth >= 1024) return;
+      const startDragging = (e: TouchEvent | MouseEvent) => {
+        isDown = true;
+        startX = ("touches" in e ? e.touches[0] : e).pageX - track.offsetLeft;
+        scrollLeft = track.scrollLeft;
+        track.style.cursor = "grabbing";
+      };
 
-    const track = trackRef.current;
-    if (!track) return;
+      const stopDragging = () => {
+        isDown = false;
+        track.style.cursor = "grab";
+      };
 
-    const cardWidth =
-      track.firstElementChild?.clientWidth ?? 0;
-    const gap = 24; // gap-6 = 24px
-    const step = cardWidth + gap;
+      const drag = (e: TouchEvent | MouseEvent) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = ("touches" in e ? e.touches[0] : e).pageX - track.offsetLeft;
+        const walk = (x - startX) * 2; // scroll speed multiplier
+        track.scrollLeft = scrollLeft - walk;
+      };
 
-    autoSlideRef.current = setInterval(() => {
-      if (
-        track.scrollLeft + track.clientWidth >=
-        track.scrollWidth - 5
-      ) {
-        track.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        track.scrollBy({ left: step, behavior: "smooth" });
-      }
-    }, 2000);
+      // Add event listeners for both touch and mouse (better UX on tablets)
+      track.addEventListener("mousedown", startDragging);
+      track.addEventListener("touchstart", startDragging);
+      track.addEventListener("mouseleave", stopDragging);
+      track.addEventListener("mouseup", stopDragging);
+      track.addEventListener("touchend", stopDragging);
+      track.addEventListener("mousemove", drag);
+      track.addEventListener("touchmove", drag);
 
-    return () => {
-      if (autoSlideRef.current) {
-        clearInterval(autoSlideRef.current);
-      }
-    };
+      // Optional: Add subtle snap / inertia feel with CSS (modern browsers)
+      track.style.scrollSnapType = "x proximity";
+      track.style.scrollBehavior = "smooth";
+
+      return () => {
+        // Cleanup
+        track.removeEventListener("mousedown", startDragging);
+        track.removeEventListener("touchstart", startDragging);
+        track.removeEventListener("mouseleave", stopDragging);
+        track.removeEventListener("mouseup", stopDragging);
+        track.removeEventListener("touchend", stopDragging);
+        track.removeEventListener("mousemove", drag);
+        track.removeEventListener("touchmove", drag);
+      };
+    }
   }, []);
 
   return (
@@ -119,11 +132,7 @@ const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
       {/* ================= SECTION ================= */}
       <section
         ref={sectionRef}
-        className="
-          relative bg-[#E5E7EB] py-20
-          lg:overflow-hidden
-          overflow-visible
-        "
+        className="relative bg-[#E5E7EB] py-20 lg:overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-6">
           {/* Header */}
@@ -150,11 +159,11 @@ const autoSlideRef = useRef<ReturnType<typeof setInterval> | null>(null);
             className="
               flex gap-6 px-6 w-max
               overflow-x-auto
-              touch-pan-x
               snap-x snap-mandatory
-              lg:overflow-visible
+              scrollbar-hide
+              cursor-grab active:cursor-grabbing
+              -webkit-overflow-scrolling: touch /* iOS momentum */
             "
-            style={{ WebkitOverflowScrolling: "touch" }}
           >
             {points.map((item, index) => {
               const Icon = item.icon;
